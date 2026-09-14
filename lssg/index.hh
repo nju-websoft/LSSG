@@ -17,10 +17,10 @@ public:
 };
 
 template <typename att_t, typename vec_t, typename scope_kernel_t>
-class PoIndex
+class LSSGIndex
 {
 public:
-  PoIndex(size_t max_elements, size_t vec_d, size_t M, size_t efc, std::string space_name,
+  LSSGIndex(size_t max_elements, size_t vec_d, size_t M, size_t efc, std::string space_name,
       std::unique_ptr<scope_kernel_t> &scope_kernel)
       : max_elements_(max_elements), vec_d_(vec_d), M_(M), efc_(efc)
   {
@@ -30,7 +30,7 @@ public:
     sizelinklistsmem_ = max_elements_ * sizelinks_per_element_;
     linklistsmemory_  = (char *)glass::alloc2M(sizelinklistsmem_);
     if (linklistsmemory_ == nullptr) {
-      throw std::runtime_error("Not enough memory: PoIndex failed to allocate linklist");
+      throw std::runtime_error("Not enough memory: LSSGIndex failed to allocate linklist");
     }
     offset_label_     = 0;
     offset_vec_       = offset_label_ + sizeof(label_t);
@@ -48,7 +48,7 @@ public:
     visited_pool_.Init(max_elements);
   }
 
-  PoIndex(std::string index_path, std::string scope_kernel_path, std::string space_name)
+  LSSGIndex(std::string index_path, std::string scope_kernel_path, std::string space_name)
   {
     std::ifstream sk_ifs(scope_kernel_path, std::ios::binary);
     if (!sk_ifs.is_open()) {
@@ -380,13 +380,13 @@ public:
     return final_res;
   }
 
-  PoIndex(const PoIndex &)            = delete;
-  PoIndex &operator=(const PoIndex &) = delete;
-  PoIndex(PoIndex &&)                 = delete;
-  PoIndex &operator=(PoIndex &&)      = delete;
-  PoIndex()                           = delete;
+  LSSGIndex(const LSSGIndex &)            = delete;
+  LSSGIndex &operator=(const LSSGIndex &) = delete;
+  LSSGIndex(LSSGIndex &&)                 = delete;
+  LSSGIndex &operator=(LSSGIndex &&)      = delete;
+  LSSGIndex()                             = delete;
 
-  ~PoIndex()
+  ~LSSGIndex()
   {
     free(linklistsmemory_);
     linklistsmemory_ = nullptr;

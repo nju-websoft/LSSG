@@ -366,14 +366,15 @@ public:
   {
     curV_        = -1;
     numelements_ = numelements1;
-    mass_        = static_cast<vl_type *>(aligned_alloc(64, numelements_ * sizeof(vl_type)));
+    mass_        = Allocate(numelements_);
   }
 
   void Resize(int numelements1)
   {
+    free(mass_);
     curV_        = -1;
     numelements_ = numelements1;
-    mass_        = static_cast<vl_type *>(aligned_alloc(64, numelements_ * sizeof(vl_type)));
+    mass_        = Allocate(numelements_);
   }
 
   inline void Clear() override
@@ -408,12 +409,22 @@ public:
 
   ~VisitedList() override { free(mass_); }
 
+private:
+  static vl_type *Allocate(int numelements)
+  {
+    if (numelements <= 0) {
+      return nullptr;
+    }
+    const size_t bytes = (static_cast<size_t>(numelements) * sizeof(vl_type) + 63) & ~size_t(63);
+    return static_cast<vl_type *>(aligned_alloc(64, bytes));
+  }
+
 public:
-  vl_type      curV_;
-  vl_type     *mass_;
-  unsigned int numelements_;
+  vl_type      curV_{0};
+  vl_type     *mass_{nullptr};
+  unsigned int numelements_{0};
   size_t       num_ones_{0};
-  id_t         last_1_;
+  id_t         last_1_{};
 };
 
 template <typename VisitedType = lssg_bitset<tableint>>

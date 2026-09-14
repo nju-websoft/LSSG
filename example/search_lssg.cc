@@ -1,5 +1,5 @@
 #include "../lssg/config.hh"
-#include "../lssg/poindex.hh"
+#include "../lssg/index.hh"
 #include "bench_utils.hh"
 
 #include <algorithm>
@@ -213,7 +213,7 @@ int main(int argc, char **argv)
           scenario.gt_file);
     }
 
-    lssg::PoIndex<lssg::labelset_t, float, lssg::LabelSetScopeKernel> index(
+    lssg::LSSGIndex<lssg::labelset_t, float, lssg::LabelSetScopeKernel> index(
         index_location, scope_location, space);
 
     std::cout << "ef,recall,qps,dist_comp,hops\n";

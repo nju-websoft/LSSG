@@ -315,6 +315,11 @@ public:
     vertex_labelsetid_lookup_[inid] = labelset_id;
     spinUnlock(inid);
 
+    // Keep vector-backed labelset metadata stable while updating the per-labelset
+    // counters and entry points. A concurrent insertion may grow these vectors
+    // while another insertion is finishing its graph update.
+    std::shared_lock<std::shared_mutex> metadata_lock(data_mutex_);
+
     // Update per-labelset vertex count for selectivity computation
     if (labelset_id < labelset_vertex_counts_.size()) {
       __atomic_fetch_add(&labelset_vertex_counts_[labelset_id], (size_t)1, __ATOMIC_RELAXED);
@@ -342,7 +347,11 @@ public:
     entry_points_per_layer.resize(num_layers);
 
     for (size_t i = 0; i < num_layers; ++i) {
-      scopes[i].Resize(all_labelsets_.size());
+      // Use the fixed vertex capacity instead of the current labelset count.
+      // Labelset IDs can grow while another insertion is traversing the graph;
+      // the larger scope prevents a newly published vertex from indexing past
+      // the snapshot returned by this method.
+      scopes[i].Resize(this->max_elements_);
     }
 
     scopes[this->top_layer_].Fill();
@@ -599,6 +608,7 @@ public:
   auto FilterCandidates(const std::vector<dist_id_pair> &candidates, tableint center_inid, layer_t layer)
       -> std::vector<dist_id_pair> override
   {
+    std::shared_lock<std::shared_mutex> read_lock(data_mutex_);
     if (layer == 0)
       return candidates;
     std::vector<dist_id_pair> pruned_candidates;
@@ -629,7 +639,7 @@ public:
     std::shared_lock<std::shared_mutex> read_lock(data_mutex_);
 
     auto                      label_config = dynamic_cast<const LabelFilterConfig &>(filter_config);
-    lssg_bitset<labelset_id_t> scope(all_labelsets_.size());
+    lssg_bitset<labelset_id_t> scope(this->max_elements_);
 
     if (query_labelset.empty()) {
       scope.Clear();
@@ -670,7 +680,7 @@ public:
 
   inline auto GetEmptyScope() -> lssg_bitset<labelset_id_t> override
   {
-    lssg_bitset<labelset_id_t> scope(all_labelsets_.size());
+    lssg_bitset<labelset_id_t> scope(this->max_elements_);
     scope.Clear();
     return scope;
   }

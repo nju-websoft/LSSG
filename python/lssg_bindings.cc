@@ -12,7 +12,7 @@
 #include <pybind11/stl.h>
 
 #include "../lssg/config.hh"
-#include "../lssg/poindex.hh"
+#include "../lssg/index.hh"
 
 #include <algorithm>
 #include <climits>
@@ -32,7 +32,7 @@ namespace {
 
 using FloatArray = py::array_t<float, py::array::c_style | py::array::forcecast>;
 using LabelSet = lssg::labelset_t;
-using Index = lssg::PoIndex<LabelSet, float, lssg::LabelSetScopeKernel>;
+using Index = lssg::LSSGIndex<LabelSet, float, lssg::LabelSetScopeKernel>;
 
 int thread_count(size_t requested)
 {

@@ -1,5 +1,5 @@
 #include "../lssg/config.hh"
-#include "../lssg/poindex.hh"
+#include "../lssg/index.hh"
 #include "bench_utils.hh"
 
 #include <algorithm>
@@ -106,7 +106,7 @@ int main(int argc, char **argv)
     std::cerr << "Scope kernel initialized in "
               << std::chrono::duration<double>(init_end - init_start).count() << " seconds\n";
 
-    lssg::PoIndex<lssg::labelset_t, float, lssg::LabelSetScopeKernel> index(
+    lssg::LSSGIndex<lssg::labelset_t, float, lssg::LabelSetScopeKernel> index(
         vector_count, dim, m, efc, space, label_kernel);
 
     auto start = std::chrono::high_resolution_clock::now();

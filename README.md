@@ -4,7 +4,7 @@
 
 LSSG implements a multi-tier proximity graph for label-filtering approximate nearest neighbor search (LFANNS). It unifies the three canonical label filters — **equality**, **containment**, and **overlap** — in a single index by interpreting label-set relations through label-set distance (Jaccard distance). Edges are stratified into tiers with nested similarity bounds; the bottom tier is label-agnostic for global navigability, while upper tiers connect increasingly similar label sets and preserve equality exactly at the top tier. Search performs tier-ordered in-filtering beam search, escalating to stricter tiers to escape local minima in selective regions.
 
-The accompanying executables and Bash files under `example/` are benchmark helpers. The public tree does not install a separate library binary.
+The accompanying executables and Bash files under `example/` are benchmark helpers.
 
 Key contributions:
 
@@ -21,6 +21,8 @@ Key contributions:
 4. (Optional) AVX-512 for the SIMD-accelerated paths
 
 ## Installation
+
+Just includes lssg/index.hh in your project. Build and search examples are also provided as below.
 
 Build the project from a fresh build directory:
 
@@ -74,8 +76,6 @@ A 100,000-vector synthetic build/search example is available at [`example/random
 - **Labels (`.txt`)**: each line is one label set, represented by comma-separated integer labels. The label file contains one label set per base/query vector.
 - **Ground truth (`.bin`)**: each query record contains a 4-byte result count followed by that many 4-byte vector IDs. `search_lssg.sh` generates this file when it is missing.
 
-The vector and label counts must match exactly. Dataset files are intentionally not included in this repository. Ground truth is generated automatically by `search_lssg.sh` when its configured file does not exist, and the script brute-force-validates a few query records before measuring ANN performance.
-
 ### Dataset sources and descriptions
 
 | Dataset | Size | Dim | \|A\| | \|ℒ\| | Description |
@@ -115,13 +115,9 @@ bash example/build_lssg.sh
 bash example/search_lssg.sh
 ```
 
-The scripts take no command-line arguments. Edit their paths and parameters at the beginning of each file. They configure/build the required executable and keep build diagnostics on stderr, so search results remain CSV on stdout.
-
-For a quick smoke test, set `MAX_VECTORS` in `build_lssg.sh`, then set the same value as `MAX_BASE_VECTORS` in `search_lssg.sh`, and set `MAX_QUERIES` in `search_lssg.sh`. The missing ground truth is generated from those same slices and its first three queries are checked by brute force.
-
 ### Summary of experimental results
 
-On the evaluated real-world datasets, LSSG provides high-recall filtered ANNS for equality, containment, and overlap queries. LSSG-MinHash reduces label-indexing overhead as the label space grows, while LSSG-IVF provides a tunable candidate budget. The public tree includes the reproducible index-building, ground-truth-generation, and search paths; paper plots and large dataset files are intentionally excluded.
+On the evaluated real-world datasets, LSSG provides high-recall filtered ANNS for equality, containment, and overlap queries. LSSG-MinHash reduces label-indexing overhead as the label space grows, while LSSG-IVF provides a tunable candidate budget. The complete evaluation results can be found in [the benchmarking repository](https://github.com/ziqiwww/lssg_benchmark).
 
 ## License
 
