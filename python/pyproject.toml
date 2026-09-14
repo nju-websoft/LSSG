@@ -1,0 +1,11 @@
+[build-system]
+requires = ["setuptools>=61", "wheel", "pybind11>=2.10", "numpy"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "pylssg"
+version = "0.1.0"
+description = "Python bindings for the LSSG label-filtering ANN index"
+requires-python = ">=3.8"
+dependencies = ["numpy"]
+
